@@ -46,7 +46,6 @@ void UGrabber::FindPhysicsHandleComponent()
 	}
 }
 void UGrabber::Grab() {
-
 	FHitResult Hit = GetFirstPhysicsBodyInReach();
 	auto ComponentToGrab = Hit.GetComponent();
 	AActor* ActorHit = Hit.GetActor();
@@ -54,7 +53,7 @@ void UGrabber::Grab() {
 	if (ActorHit) {
 		PhysicsHandle->GrabComponent(
 			ComponentToGrab,
-			NAME_None,
+			NAME_None, // no bones needed
 			ComponentToGrab->GetOwner()->GetActorLocation(),
 			true // allow rotation
 		);
@@ -70,32 +69,35 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (PhysicsHandle->GrabbedComponent) {
-		FRotator PlayerRotation;
-		FVector PlayerLocation;
-		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerLocation, PlayerRotation);
-		FVector LineTraceEnd = PlayerLocation + PlayerRotation.Vector() * Reach;
-
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+		PhysicsHandle->SetTargetLocation(GetReachLineEnd());
 	}
 }
 
-const FHitResult UGrabber::GetFirstPhysicsBodyInReach() {
+const FVector UGrabber::GetReachLineStart() {
 	FRotator PlayerRotation;
 	FVector PlayerLocation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerLocation, PlayerRotation);
-	FVector LineTraceEnd = PlayerLocation + PlayerRotation.Vector() * Reach;
+	return PlayerLocation;
+}
+const FVector UGrabber::GetReachLineEnd() {
+	FRotator PlayerRotation;
+	FVector PlayerLocation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerLocation, PlayerRotation);
+	return PlayerLocation + PlayerRotation.Vector() * Reach;
+}
 
+const FHitResult UGrabber::GetFirstPhysicsBodyInReach() {
 	/// setup query parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
 
-	FHitResult Hit;
+	FHitResult HitResult;
 	GetWorld()->LineTraceSingleByObjectType(
-		Hit,
-		PlayerLocation,
-		LineTraceEnd,
+		HitResult,
+		GetReachLineStart(),
+		GetReachLineEnd(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParameters
 	);
-	return Hit;
+	return HitResult;
 }
 

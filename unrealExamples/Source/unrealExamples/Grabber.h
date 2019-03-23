@@ -27,6 +27,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+
 private:
 
 	UPROPERTY(EditAnywhere)
@@ -45,4 +46,8 @@ private:
 	void SetupInputComponent();
 	// Return hit for first physics body in reach
 	const FHitResult GetFirstPhysicsBodyInReach();
+	// Return current end of reach line
+	const FVector GetReachLineEnd();
+	// Return current start of reach line
+	const FVector GetReachLineStart();
 };
