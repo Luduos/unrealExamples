@@ -50,7 +50,7 @@ void UGrabber::Grab() {
 	auto ComponentToGrab = Hit.GetComponent();
 	AActor* ActorHit = Hit.GetActor();
 
-	if (ActorHit) {
+	if (ActorHit && PhysicsHandle) {
 		PhysicsHandle->GrabComponent(
 			ComponentToGrab,
 			NAME_None, // no bones needed
@@ -61,13 +61,17 @@ void UGrabber::Grab() {
 }
 
 void UGrabber::Release() {
-	PhysicsHandle->ReleaseComponent();
+	if(PhysicsHandle)
+		PhysicsHandle->ReleaseComponent();
 }
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!PhysicsHandle)
+		return;
 	if (PhysicsHandle->GrabbedComponent) {
 		PhysicsHandle->SetTargetLocation(GetReachLineEnd());
 	}
@@ -76,7 +80,9 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 const FVector UGrabber::GetReachLineStart() {
 	FRotator PlayerRotation;
 	FVector PlayerLocation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(PlayerLocation, PlayerRotation);
+	auto FirstPlayerController = GetWorld()->GetFirstPlayerController();
+	if(FirstPlayerController)
+		FirstPlayerController->GetPlayerViewPoint(PlayerLocation, PlayerRotation);
 	return PlayerLocation;
 }
 const FVector UGrabber::GetReachLineEnd() {
