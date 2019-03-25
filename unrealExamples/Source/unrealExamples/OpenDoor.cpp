@@ -21,21 +21,9 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	PressurePlate = nullptr;
 	Owner = GetOwner();
 }
 
-void UOpenDoor::OpenDoor()
-{
-	if(Owner)
-		Owner->SetActorRotation(FRotator(0.f, OpenAngle, 0.f));
-}
-
-void UOpenDoor::CloseDoor()
-{
-	if(Owner)
-		Owner->SetActorRotation(FRotator(0.f, 0.f, 0.f));
-}
 
 
 // Called every frame
@@ -44,13 +32,15 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (GetTotalMassOfActorsOnPlate() > ThresholdToOpenDoor) {
-		OpenDoor();
+		OnOpen.Broadcast();
 		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 
 	if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay)
-		CloseDoor();
+		OnClose.Broadcast();
 	
+
+
 }
 
 float UOpenDoor::GetTotalMassOfActorsOnPlate() 

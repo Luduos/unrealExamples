@@ -80,6 +80,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 const FVector UGrabber::GetReachLineStart() {
 	FRotator PlayerRotation;
 	FVector PlayerLocation;
+
 	auto FirstPlayerController = GetWorld()->GetFirstPlayerController();
 	if(FirstPlayerController)
 		FirstPlayerController->GetPlayerViewPoint(PlayerLocation, PlayerRotation);
